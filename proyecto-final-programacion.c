@@ -67,8 +67,8 @@ typedef enum{
 
 // ===== END Enums ===== //
 
- // ===== CRUD CLIENTES ===== //
- Cliente crearFecha(){
+// ===== CRUD CLIENTES ===== //
+Cliente crearFecha(){
     Cliente cliente;
     printf("Ingrese la cédula: ");
     scanf("%d", &cliente.cedula);
@@ -83,18 +83,75 @@ typedef enum{
     return cliente;
 }
 
-void mostrarFecha(Cliente cliente){
+void mostrarCliente(Cliente cliente){
     // code //
 }
 
-Cliente modificarFecha(Cliente cliente){
+Cliente modificarCliente(Cliente cliente){
     // con un switch y capturar la opción le pregunta al usuario que dato quiere modificar.
     // code //
 	return cliente;
 }
 
-Cliente eliminarFecha(){
+Cliente eliminarCliente(){
     Cliente cliente;
 	return cliente;
 }
+
+ // ===== END CRUD CLIENTES ===== //
+
+
+ // ===== CRUD FECHA ===== //
+
+ Fecha crearFecha(){
+	Fecha fecha;
+	printf("ingrese el dia");
+	scanf("%d", &fecha.dia);
+	printf("ingrese el mes");
+	scanf("%d", &fecha.mes);
+	printf("ingrese el año");
+	scanf("%d", &fecha.anyo);
+}
+
+void mostrarFecha(Fecha fecha){
+      printf("%d/%d/%d", fecha.dia, fecha.mes, fecha.anyo);
+}
+
+Fecha modificarFecha(Fecha fecha){
+    // con un switch y capturar la opción le pregunta al usuario que dato quiere modificar.
+    int opc;
+	printf("¿que dato desea modificar?");
+	printf("1.Dia");
+	printf("2.Mes");
+	printf("3.Año");
+	scanf("%d", &opc);
+	switch (opc)
+	{
+		case 1:
+			printf("ingrese su dia");
+			scanf("%d", &fecha.dia);
+			break;
+			
+		case 2:
+			printf("ingrese su mes");
+			scanf("%d", &fecha.mes);
+			break;
+			
+		case 3:
+			printf("ingrese su año");
+			scanf("%d", &fecha.anyo);
+			break;
+		default:
+			printf("opcion no encontrada");
+			break;
+	}
+	return fecha;
+}
+
+Fecha eliminarFecha(){
+    Fecha fecha;
+	return fecha;
+}
+
+// ===== END CRUD FECHA ===== //
 
