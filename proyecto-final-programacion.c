@@ -38,8 +38,10 @@ typedef struct{ //estructura anidada la cual usamos para la compra
 	int numeroCompra;
 	Cliente cliente;
 	Libro libros[10];
+	int cantidadLibros;
 	Fecha fecha;
 	int metodoDePago;
+	float totalAPagar;
 } Compra;
 
 typedef struct{ //segunda estructura anidada para el prestamo, aun no terminada no se como integra la fecha de devolucion AJAJJA
@@ -77,6 +79,15 @@ typedef enum{
 } EstadoPrestamo;
 
 // ===== END Enums ===== //
+
+// ===== CALCULAR TOTAL A PAGAR EN COMPRA ===== //
+float calcularTotal(Libro libros[], int cantidad){
+	if(cantidad == 1){
+		return libros[cantidad-1].precio;
+	}
+	return calcularTotal(libros, cantidad-1) + libros[cantidad-1].precio;
+}
+// ===== END TOTAL A PAGAR ===== //
 
 // ===== CRUD CLIENTES ===== //
 Cliente crearCliente(int nuevoCliente){
@@ -198,6 +209,20 @@ Fecha eliminarFecha(){
 // ===== END CRUD FECHA ===== //
 
 // ===== CRUD LIBRO ===== //
+//ademas de hacer el switch para modificar libro, obviamente necesita un menu para llamarlo y ver la opcion que digite el usuario
+//menu
+int menu(){
+    printf("¿Que dato sobre el libro desea modificar?\n");
+    printf("1. Cambiar el  autor del libro\n");
+    printf("2. Cambiar el titulo\n");
+    printf("3. Cambiar el a�o de publicaci�n\n");
+    printf("4. cambiar el precio\n");
+    printf("5. cambiar la cantidad\n\n");
+    printf("0. Salir del programa\n"); 
+    printf("Digite un opcion: ");
+	return 0;
+}
+
 Libro crearLibro(int nuevoLibro){
     Libro libro;
     libro.codigo = nuevoLibro;
@@ -261,40 +286,54 @@ Libro eliminarLibro(){
     return libro;
 }
 
-//ademas de hacer el switch para modificar libro, obviamente necesita un menu para llamarlo y ver la opcion que digite el usuario
-//menu
-void menu(){
-    printf("¿Que dato sobre el libro desea modificar?\n");
-    printf("1. Cambiar el  autor del libro\n");
-    printf("2. Cambiar el titulo\n");
-    printf("3. Cambiar el a�o de publicaci�n\n");
-    printf("4. cambiar el precio\n");
-    printf("5. cambiar la cantidad\n\n");
-    printf("0. Salir del programa\n"); 
-    printf("Digite un opcion: ");
-}
 // ===== END CRUD LIBRO ===== //
 
+// ===== FUNCION SELECCIONAR LIBROS ===== //
+Libro libroSeleccionado(int codigo, Libro libros[], int cantidad){
+	for(int i = 0; i<cantidad; i++){
+		if(libros[i].codigo == codigo){
+			return libros[i];
+		}
+	}
+}
+// ===== END ===== //
+
 // ===== CRUD COMPRA ===== //
-Compra crearCompra(){
+Compra crearCompra(Libro libros[], int cantidadLibros){
 	Compra compra;
-	printf("ingrese el numero de compra");
+	int codigo;
+	printf("ingrese el numero de compra: ");
 	scanf("%d", &compra.numeroCompra);
-	// compra.cliente = crearCliente();
-	// compra.libros[100] = crearLibro();
+	compra.cliente = crearCliente(999);
+	printf("Ingrese la cantidad de libros: ");
+	scanf("%d", &compra.cantidadLibros);
+	for(int i = 0; i<compra.cantidadLibros; i++){
+		printf("Ingrese el codigo de libros: ");
+		scanf("%d", &codigo);
+		compra.libros[i] = libroSeleccionado(codigo, libros, cantidadLibros);
+	}
 	compra.fecha = crearFecha();
-    printf("ingrese su metodo de pago");
-    printf("1.Efectivo");
-    printf("2.Tarjeta");
+    printf("ingrese su metodo de pago: \n");
+    printf("1.Efectivo\n");
+    printf("2.Tarjeta\n");
     scanf("%d", &compra.metodoDePago);
+	compra.totalAPagar = calcularTotal(compra.libros, compra.cantidadLibros);
+
 	return compra;
 }
 
 void mostrarCompra(Compra compra){
-      printf("%d", compra.numeroCompra);
-      mostrarCliente(compra.cliente);
-	  mostrarLibro(compra.libros[1]);
-	  mostrarFecha(compra.fecha);
+    printf("%d \n", compra.numeroCompra);
+    //   mostrarCliente(compra.cliente);
+	//   mostrarLibro(compra.libros[1]);
+	for(int i = 0; i<compra.cantidadLibros; i++){
+		printf("%.2f\n", compra.libros[i].precio);
+	}
+	// mostrarLibro(compra.libros[0]);
+	// mostrarLibro(compra.libros[1]);
+	printf("El total es: %.2f \n", compra.totalAPagar);
+	mostrarFecha(compra.fecha);
+
 }
 
 Compra modificarCompra(Compra compra){
@@ -332,6 +371,8 @@ Compra eliminarCompra(){
 	return compra;
 }
 // ===== END CRUD COMPRA ===== //
+
+
 
 // ===== CRUD PRESTAMO ===== //
 Prestamo crearPrestamo(){
@@ -402,6 +443,22 @@ Prestamo eliminarPrestamo(){
 }
 // ===== END CRUD PRESTAMO ===== //
 
+// ===== VALIDACIONES DATOS ===== //
+int verificarCliente(int nuevoCliente, Cliente clientes[], int cantidadClientes){
+	int cedulaExistente;
+    
+	for(int i = 0; i<= cantidadClientes; i++){
+		cedulaExistente = clientes[i].cedula;
+		if(cedulaExistente == nuevoCliente){
+			printf("Ya existe un cliente con ese numero de cedula\n");
+			return 0;
+		}
+	}
+	return 1;
+}
+
+
+// ===== END VALIDACIONES DATOS ===== //
 
 // ===== MANEJO DE ARCHIVOS CLIENTES ===== //
 void guardarArchivoClientes(Cliente *vector, int tamano){
@@ -425,6 +482,30 @@ int leerArchivoCliente(Cliente *vector){
         }
     }
     return cont; // Retorna el cont para saber cual fue la ultima posicion llena del vector
+}
+
+// eliminar un cliente
+int eliminarClienteVector(Cliente clientes[], int cantidadClientes, int clienteAccion){
+	int found = 0;
+	for(int i = 0; i < cantidadClientes; i++){
+		if (clientes[i].cedula == clienteAccion)
+		{
+			for(int j = i; j < cantidadClientes; j++){
+				clientes[j] = clientes[j+1];
+			}
+			cantidadClientes--;
+			found = 1;
+			break;
+		}
+	}
+
+	if(found){
+		printf("Cliente Eliminado con exito! \n");
+	} else {
+		printf("No se encontró un usuario con ese numero de cedula. \n");
+	}
+
+	return cantidadClientes;
 }
 
 void menuManejoClientes(Cliente clientes[], int cantidadClientes){
@@ -485,31 +566,6 @@ void menuManejoClientes(Cliente clientes[], int cantidadClientes){
     }
 }
 // ===== END MANEJO ARCHIVO CLIENTES ===== //
-
-// eliminar un cliente
-
-int eliminarClienteVector(Cliente clientes[], int cantidadClientes, int clienteAccion){
-	int found = 0;
-	for(int i = 0; i < cantidadClientes; i++){
-		if (clientes[i].cedula == clienteAccion)
-		{
-			for(int j = i; j < cantidadClientes; j++){
-				clientes[j] = clientes[j+1];
-			}
-			cantidadClientes--;
-			found = 1;
-			break;
-		}
-	}
-
-	if(found){
-		printf("Cliente Eliminado con exito! \n");
-	} else {
-		printf("No se encontró un usuario con ese numero de cedula. \n");
-	}
-
-	return cantidadClientes;
-}
 
 // ===== MANEJO DE ARCHIVOS LIBRO ===== //
 void guardarArchivoLibros(Libro *vector, int tamano){
@@ -590,7 +646,7 @@ void guardarArchivoCompra(Compra *vector, int tamano){
     if (archivoCompra == NULL){
         printf("Error al abrir el archivo\n");
     } else {
-        fwrite(vector, sizeof(Cliente), tamano, archivoCompra);
+        fwrite(vector, sizeof(Compra), tamano, archivoCompra);
     }
     fclose(archivoCompra);
 }
@@ -601,14 +657,14 @@ int leerArchivoCompra(Compra *vector){
     if (archivoCompra == NULL){
         guardarArchivoCompra(vector, 0);
     } else {
-        while(fread(&vector[cont], sizeof(Cliente), 1, archivoCompra)){
+        while(fread(&vector[cont], sizeof(Compra), 1, archivoCompra)){
             cont++;
         }
     }
     return cont; // Retorna el cont para saber cual fue la ultima posicion llena del vector
 }
 
-void menuManejoCompra(Compra compras[], int cantidadCompras){
+void menuManejoCompra(Compra compras[], int cantidadCompras, Libro libros[], int cantidadLibros){
 	int opcion;
     while(opcion != 4) {
         printf("\n--- MENU COMPRAS ---\n");
@@ -622,7 +678,7 @@ void menuManejoCompra(Compra compras[], int cantidadCompras){
         switch (opcion) {
             case 1:
                 if (cantidadCompras < 100) {
-                    compras[cantidadCompras] = crearCompra();
+                    compras[cantidadCompras] = crearCompra(libros, cantidadLibros);
                     cantidadCompras++;
 					guardarArchivoCompra(compras, cantidadCompras);
                 } else {
@@ -730,7 +786,7 @@ void menuManejoPrestamo(Prestamo prestamo[], int cantidadPrestamo){
 // ===== END MANEJO ARCHIVO COMPRAS ===== //
 
 // ===== MANEJO DE MOVIMIENTO ===== //
-void menuMovimientos(Compra compras[], int cantidadCompras, Prestamo prestamos[], int cantidadPrestamos){
+void menuMovimientos(Compra compras[], int cantidadCompras, Prestamo prestamos[], int cantidadPrestamos, Libro libros[], int cantidadLibros){
 	int opcMovimiento;
 	printf("1. Administrar Compras \n");
 	printf("2. Administrar Ventas \n");
@@ -739,7 +795,7 @@ void menuMovimientos(Compra compras[], int cantidadCompras, Prestamo prestamos[]
 	switch (opcMovimiento)
 	{
 	case 1:
-		menuManejoCompra(compras, cantidadCompras);
+		menuManejoCompra(compras, cantidadCompras, libros, cantidadLibros);
 		break;
 	case 2:
 		menuManejoPrestamo(prestamos, cantidadPrestamos);
@@ -750,24 +806,12 @@ void menuMovimientos(Compra compras[], int cantidadCompras, Prestamo prestamos[]
 }
 // ===== END MANEJO DE MOVIMIENTO ===== //
 
-// ===== VALIDACIONES DATOS ===== //
-int verificarCliente(int nuevoCliente, Cliente clientes[], int cantidadClientes){
-	int cedulaExistente;
-    
-	for(int i = 0; i<= cantidadClientes; i++){
-		cedulaExistente = clientes[i].cedula;
-		if(cedulaExistente == nuevoCliente){
-			printf("Ya existe un cliente con ese numero de cedula\n");
-			return 0;
-		}
-	}
-	return 1;
-}
-// ===== END VALIDACIONES DATOS ===== //
+
 
 // ===== MAIN FUNCIÓN PRINCIPAL ===== //
 int main() {
     Cliente clientes[100];
+	float totalLibros;
 	int opcMain;
     int cantidadClientes = leerArchivoCliente(clientes);
 	Libro libros[100];
@@ -795,16 +839,19 @@ int main() {
 				menuManejoLibro(libros, cantidadLibros);
 				break;
 			case 3:
-				menuMovimientos(compras, cantidadCompras, prestamos, cantidadPrestamos);
+				menuMovimientos(compras, cantidadCompras, prestamos, cantidadPrestamos, libros, cantidadLibros);
+				break;
+			case 7:
+				totalLibros = calcularTotal(libros, cantidadLibros);
+				printf("El precio total de los libros es: %f", totalLibros);
 				break;
 			case 4:
-				printf("Se ha cerrado el programa, vuelva pronto.");
+				printf("\n --- Se ha cerrado el programa, vuelva pronto. ---\n");
 				break;
 			default:
 				printf("La opción no es válida");
 				break;
 		}
 	}
-	return 0;
-    
+	return 0;   
 }
