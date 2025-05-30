@@ -1,5 +1,16 @@
+#include <stdio.h>
+
+typedef struct { //estructura del cliente
+	char nombre[30];
+	char apellido[30];
+	int cedula;
+	int edad;
+	int telefono;
+	
+} Cliente;
+
 void guardarArchivoClientes(Cliente *vector, int tamano){
-    FILE *archivoClietes = fopen("clientes.bat","wb");
+    FILE *archivoClientes = fopen("clientes.bat","wb");
     if (archivoClientes == NULL){
         printf("Error al abrir el archivo");
     } else {
