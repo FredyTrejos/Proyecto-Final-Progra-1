@@ -478,8 +478,8 @@ void mostrarLibro(Libro libro){
 	// Se muestran todos los datos del libro.
 	DECORACION2
 	printf(" Codigo: %d \n", libro.codigo);
-	printf(" Autor del libro: %s \n", libro.autorLibro);
-	printf(" Titulo: %s \n", libro.titulo);
+	printf(" Autor del libro: %s", libro.autorLibro);
+	printf(" Titulo: %s", libro.titulo);
 	printf(" Anio: %d \n", libro.anio);
 	printf(" Precio: %.2f \n", libro.precio);
 	printf(" Cantidad: %d \n", libro.cantidad);
@@ -610,13 +610,13 @@ void mostrarCompra(Compra compra){
 	}
 	switch (compra.metodoDePago) {
 		case Efectivo:
-			printf("Método de pago: Efectivo\n");
+			printf("Metodo de pago: Efectivo\n");
 			break;
 		case Tarjeta:
-			printf("Método de pago: Tarjeta\n");
+			printf("Metodo de pago: Tarjeta\n");
 			break;
 		default:
-			printf("Método de pago: Desconocido\n");
+			printf("Metodo de pago: Desconocido\n");
 	}
 	printf("El total es: %.2f \n", compra.totalAPagar);
 	mostrarFecha(compra.fecha);
@@ -1056,6 +1056,7 @@ void menuManejoCompra(Compra compras[], int cantidadCompras, Libro libros[], int
                 break;
             case 2:
 				// Mostrar una a una las compras registradas.
+				cantidadCompras = leerArchivoCompra(compras);
                 for (i = 0; i < cantidadCompras; i++) {
                     printf("\ncompra #%d:\n", i+1);
                     mostrarCompra(compras[i]);
@@ -1064,6 +1065,7 @@ void menuManejoCompra(Compra compras[], int cantidadCompras, Libro libros[], int
             case 3:
 				// Se leen los libros para tener actualizada la cantidad.
 				cantidadLibros = leerArchivoLibros(libros);
+				cantidadCompras = leerArchivoCompra(compras);
                 printf("Ingrese el numero de la compra a modificar (1 a %d): ", cantidadCompras);
                 scanf("%d", &pos);
                 if (pos >= 1 && pos <= cantidadCompras) {
@@ -1077,6 +1079,7 @@ void menuManejoCompra(Compra compras[], int cantidadCompras, Libro libros[], int
                 break;
 			case 4:
 				// Eliminar una compra por su numero de compra.
+				cantidadCompras = leerArchivoCompra(compras);
 				printf("Ingrese el numero de compra a eliminar: ");
 				scanf("%d", &numeroCompra);
 				cantidadCompras = eliminarCompra(compras, cantidadCompras, numeroCompra);
@@ -1126,6 +1129,7 @@ void menuManejoPrestamo(Prestamo prestamos[], int cantidadPrestamo, Libro libros
                 break;
             case 2:
 				// Mostrar uno a uno los prestamos registrados.
+				cantidadPrestamo = leerArchivoPrestamo(prestamos);
                 for (i = 0; i < cantidadPrestamo; i++) {
     				DECORACION2
                     printf("Prestamo #%d:\n", i+1);
@@ -1135,6 +1139,7 @@ void menuManejoPrestamo(Prestamo prestamos[], int cantidadPrestamo, Libro libros
             case 3:
 				// Leer los libros para tener la cantidad actualizada.
 				cantidadLibros = leerArchivoLibros(libros);
+				cantidadPrestamo = leerArchivoPrestamo(prestamos);
                 printf("Ingrese el numero del prestamo a modificar (1 a %d): ", cantidadPrestamo);
                 int pos;
                 scanf("%d", &pos);
@@ -1149,6 +1154,7 @@ void menuManejoPrestamo(Prestamo prestamos[], int cantidadPrestamo, Libro libros
                 break;
 			case 4:
 				// Eliminar un prestamo específico a partir del numeroPrestamo.
+				cantidadPrestamo = leerArchivoPrestamo(prestamos);
 				printf("Ingrese el numero de prestamo a eliminar: ");
 				scanf("%d", &numeroPrestamo);
 				cantidadPrestamo = eliminarPrestamo(prestamos, cantidadPrestamo, numeroPrestamo);
