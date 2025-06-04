@@ -11,6 +11,7 @@ Proyecto:
 
 // ===== INCLUDE LIBRERIAS ===== //
 #include <stdio.h>
+#include <stdlib.h>
 // ===== END INCLUDE ===== //
 
 // ===== Se definen Macros ===== //
@@ -18,6 +19,15 @@ Proyecto:
 #define SONIDOERROR printf("\7"); // Sonido de error al seleccionar opciones no válidas.
 #define DECORACION printf("====================================\n"); // Decorador para separar menús e información.
 #define DECORACION2 printf("\n******************\n"); // Decorador para separar registros.
+#define LIMPIARPANTALLLA() system("cls");
+
+#define TAMANIOMAXIMO 100
+
+// ===== VARIABLES GLOBALES ===== //
+int cantidadClientes = 0;
+int cantidadLibros = 0;
+int cantidadCompras = 0;
+int cantidadPrestamos = 0;
 // ===== END Macros ===== //
 
 // ===== SE DEFINEN LOS ENUMS ===== //
@@ -80,82 +90,12 @@ typedef struct{ // Estructura anidada para el prestamo.
 } Prestamo;
 // ===== END ESTRUCTURAS ===== //
 
-// ===== VALIDACIONES DATOS ===== //
-int verificarCliente(int cedulaNueva, Cliente clientes[], int cantidadClientes){
-	// Recibe la cedula nueva y la busca en los clientes existentes, si existe retorna 1, sino retorna 0.
-	int cedulaExistente;
-	int i;
-    for(i = 0; i < cantidadClientes; i++){
-		cedulaExistente = clientes[i].cedula;
-		if(cedulaExistente == cedulaNueva){
-			return 1;
-		}
-	}
-	return 0;
-}
-
-Cliente asignarCliente(int nuevoCedula, Cliente clientes[], int cantidadClientes){
-	// Recibe la cedula y la busca en la lista de clientes para retornar el cliente con esa cedula.
-	int cedulaExistente, i;
-	for(i = 0; i < cantidadClientes; i++){
-		cedulaExistente = clientes[i].cedula;
-		if(cedulaExistente == nuevoCedula){
-			return clientes[i];
-		}
-	}
-	return clientes[0];
-}
-
-int buscarUltimoCodigo(Libro libros[], int cantidadLibros){
-	// Retornará el código del libro en la última posición.
-	if(cantidadLibros == 0){
-		return 0;
-	}
-	return libros[cantidadLibros-1].codigo;
-}
-
-Libro libroSeleccionado(int codigo, Libro libros[], int cantidad){
-	// Recibe el codigo y lo busca en la lista de libros, sino está retorna el primer libro de la lista por defecto.
-	int i;
-	for(i = 0; i < cantidad; i++){
-		if(libros[i].codigo == codigo){
-			return libros[i];
-		}
-	}
-	return libros[0];
-}
-// ===== END VALIDACIONES DATOS ===== //
-
-// ===== CALCULAR TOTAL A PAGAR EN COMPRA ===== //
-float calcularTotal(Libro libros[], int cantidad){
-	// Función recursiva, recibe los libros de la compra y la cantidad (tamaño).
-	if(cantidad == 1){
-		return libros[cantidad-1].precio;
-	}
-	// El caso base será la cantidad 1, retornará el precio del libro en la primera posición.
-	// Calcula el total reduciendo la cantidad y sumandolo al precio del libro en la posición actual (cantidad-1).
-	return calcularTotal(libros, cantidad-1) + libros[cantidad-1].precio;
-}
-// ===== END TOTAL A PAGAR ===== //
-
-// ===== CALCULAR TOTAL VENDIDO ===== //
-int calcularTotalVendido(Compra compras[], int cantidadCompras){
-	// Calcula con recursividad el Total vendido.
-	if(cantidadCompras == 1){
-		// Caso base, la cantidad es igual a 1 retorna el total a pagar de la primera compra.
-		return compras[cantidadCompras-1].totalAPagar;
-	}
-	// Reduce la cantidad para llamar la función y se suma con el total a pagar de la compra actual (cantidad-1).
-	return calcularTotalVendido(compras, cantidadCompras-1) + compras[cantidadCompras-1].totalAPagar;
-}
-// ===== END TOTAL VENDIDO ===== //
-
 // ===== MANEJO DE ARCHIVOS TOTALES ===== //
 
 // ===== MANEJO DE ARCHIVOS CLIENTES ===== //
 void guardarArchivoClientes(Cliente *vector, int tamano){
 	// Declara de tipo FILE el archivo en modo escritura
-    FILE *archivoClientes = fopen("clientes.bat","wb");
+    FILE *archivoClientes = fopen("Clientes.bat","wb");
     if (archivoClientes == NULL){
         printf("Error al abrir el archivo\n");
         SONIDOERROR
@@ -168,7 +108,7 @@ void guardarArchivoClientes(Cliente *vector, int tamano){
 
 int leerArchivoCliente(Cliente *vector){
 	// Declara de tipo FILE el archivo en modo lectura
-    FILE *archivoClientes = fopen("clientes.bat","rb");
+    FILE *archivoClientes = fopen("Clientes.bat","rb");
     int cont = 0;
     if (archivoClientes == NULL){
         guardarArchivoClientes(vector, 0);
@@ -185,7 +125,7 @@ int leerArchivoCliente(Cliente *vector){
 // ===== MANEJO DE ARCHIVOS LIBRO ===== //
 void guardarArchivoLibros(Libro *vector, int tamano){
 	// Declara de tipo FILE el archivo en modo escritura.
-    FILE *archivoLibro = fopen("libros.bat","wb");
+    FILE *archivoLibro = fopen("Libros.bat","wb");
     if (archivoLibro == NULL){
         printf("Error al abrir el archivo\n");
         SONIDOERROR
@@ -198,7 +138,7 @@ void guardarArchivoLibros(Libro *vector, int tamano){
 
 int leerArchivoLibros(Libro *vector){
 	// Declara de tipo FILE el archivo en modo lectura.
-    FILE *archivoLibro = fopen("libros.bat","rb");
+    FILE *archivoLibro = fopen("Libros.bat","rb");
     int cont = 0;
     if (archivoLibro == NULL){
 		guardarArchivoLibros(vector, 0);
@@ -215,7 +155,7 @@ int leerArchivoLibros(Libro *vector){
 // ===== MANEJO DE ARCHIVO DE COMPRAS ===== //
 void guardarArchivoCompra(Compra *vector, int tamano){
 	// Declara de tipo FILE el archivo en modo escritura.
-    FILE *archivoCompra = fopen("compra.bat","wb");
+    FILE *archivoCompra = fopen("Compras.bat","wb");
     if (archivoCompra == NULL){
         printf("Error al abrir el archivo\n");
         SONIDOERROR
@@ -228,7 +168,7 @@ void guardarArchivoCompra(Compra *vector, int tamano){
 
 int leerArchivoCompra(Compra *vector){
 	// Declara de tipo FILE el archivo en modo lectura
-    FILE *archivoCompra = fopen("compra.bat","rb");
+    FILE *archivoCompra = fopen("Compras.bat","rb");
     int cont = 0;
     if (archivoCompra == NULL){
         guardarArchivoCompra(vector, 0);
@@ -245,7 +185,7 @@ int leerArchivoCompra(Compra *vector){
 // ===== MANEJO DE ARCHIVO DE PRESTAMO ===== //
 void guardarArchivoPrestamo(Prestamo *vector, int tamano){
 	// Declara de tipo FILE el archivo en modo escritura.
-    FILE *archivoPrestamo = fopen("prestamo.bat","wb");
+    FILE *archivoPrestamo = fopen("Prestamos.bat","wb");
     if (archivoPrestamo == NULL){
         printf("Error al abrir el archivo\n");
         SONIDOERROR
@@ -258,7 +198,7 @@ void guardarArchivoPrestamo(Prestamo *vector, int tamano){
 
 int leerArchivoPrestamo(Prestamo *vector){
 	// Declara de tipo FILE el archivo en modo lectura
-    FILE *archivoPrestamo = fopen("prestamo.bat","rb");
+    FILE *archivoPrestamo = fopen("Prestamos.bat","rb");
     int cont = 0;
     if (archivoPrestamo == NULL){
         guardarArchivoPrestamo(vector, 0);
@@ -273,6 +213,192 @@ int leerArchivoPrestamo(Prestamo *vector){
 // ===== END MANEJO DE ARCHIVO PRESTAMOS ===== //
 
 // ===== END MANEJO DE ARCHIVOS TOTALES ===== //
+
+
+// ===== VALIDACIONES DATOS ===== //
+int verificarCliente(int cedulaNueva, Cliente clientes[]){
+	// Recibe la cedula nueva y la busca en los clientes existentes, si existe retorna 1, sino retorna 0.
+	int cedulaExistente;
+	int i;
+    for(i = 0; i < cantidadClientes; i++){
+		cedulaExistente = clientes[i].cedula;
+		if(cedulaExistente == cedulaNueva){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+Cliente asignarCliente(int nuevoCedula, Cliente clientes[]){
+	// Recibe la cedula y la busca en la lista de clientes para retornar el cliente con esa cedula.
+	int cedulaExistente, i;
+	for(i = 0; i < cantidadClientes; i++){
+		cedulaExistente = clientes[i].cedula;
+		if(cedulaExistente == nuevoCedula){
+			return clientes[i];
+		}
+	}
+	return clientes[0];
+}
+
+int buscarUltimoCodigo(Libro libros[]){
+	// Retornará el código del libro en la última posición.
+	if(cantidadLibros == 0){
+		return 0;
+	}
+	return libros[cantidadLibros-1].codigo;
+}
+
+Libro libroSeleccionado(Libro libros[]) {
+    int codigo, existe = 0;
+    while(1) {
+        printf("Ingrese el codigo del libro: ");
+        scanf("%d", &codigo);
+
+        for (int i = 0; i < cantidadLibros; i++) {
+            if (libros[i].codigo == codigo) {
+				existe = 1;
+				if(libros[i].cantidad != 0){
+                return libros[i]; // Libro válido encontrado existente.
+				}
+				printf("Ya no quedan libros con este codigo. \n");
+            }
+        }
+
+		if(!existe){
+        	printf("El codigo no existe, por favor intente de nuevo.\n");
+		}
+    }
+}
+
+void calcularCantidadLibro(Libro libros[], int codigo, int nuevoValor){
+	int i;
+	for(i = 0; i < cantidadLibros; i++){
+		if(libros[i].codigo == codigo){
+			libros[i].cantidad += nuevoValor;
+		}
+	}
+	guardarArchivoLibros(libros, cantidadLibros);
+}
+
+Prestamo asignarEstado(Libro libros[], Prestamo prestamo){
+	int i;
+	EstadoPrestamo estado;
+	printf("Ingrese el estado del prestamo: ");
+	scanf("%d", &estado);
+
+	if(estado == prestamo.estado){
+		return prestamo;
+	}
+
+	prestamo.estado = estado;
+
+	switch(prestamo.estado)
+	{
+		case Prestado:
+			for(i = 0; i < prestamo.cantidadLibros; i++){
+				calcularCantidadLibro(libros, prestamo.libros[i].codigo, -1);
+			}
+			break;
+		case Devuelto:
+			for(i = 0; i < prestamo.cantidadLibros; i++){
+				calcularCantidadLibro(libros, prestamo.libros[i].codigo, 1);
+			}
+			break;
+		default:
+			printf("Opcion invalida. Se asignara Prestado por defecto.\n");
+			prestamo.estado = Prestado;
+			break;
+	}
+	return prestamo;
+}
+// ===== END VALIDACIONES DATOS ===== //
+
+// ===== CALCULAR TOTAL A PAGAR EN COMPRA ===== //
+float calcularTotal(Libro libros[], int cantidad){
+	// Función recursiva, recibe los libros de la compra y la cantidad (tamaño).
+	if(cantidad == 1){
+		return libros[cantidad-1].precio;
+	}
+	// El caso base será la cantidad 1, retornará el precio del libro en la primera posición.
+	// Calcula el total reduciendo la cantidad y sumandolo al precio del libro en la posición actual (cantidad-1).
+	return calcularTotal(libros, cantidad-1) + libros[cantidad-1].precio;
+}
+// ===== END TOTAL A PAGAR ===== //
+
+// ===== CALCULAR TOTAL VENDIDO ===== //
+int calcularTotalVendido(Compra compras[], int cantidad){
+	// Calcula con recursividad el Total vendido.
+	if(cantidad == 1){
+		// Caso base, la cantidad es igual a 1 retorna el total a pagar de la primera compra.
+		return compras[cantidad-1].totalAPagar;
+	}
+	// Reduce la cantidad para llamar la función y se suma con el total a pagar de la compra actual (cantidad-1).
+	return calcularTotalVendido(compras, cantidad-1) + compras[cantidad-1].totalAPagar;
+}
+// ===== END TOTAL VENDIDO ===== //
+
+// ===== CLIENTE CON MÁS COMPRAS ===== //
+Cliente mostrarClienteConMasCompras(Compra compras[]) {
+    int maxCompras = 0;
+	Cliente cliente;
+
+    for(int i = 0; i < cantidadCompras; i++) {
+        int cedulaActual = compras[i].cliente.cedula;
+        int contador = 0;
+
+        // Contar cuántas veces aparece este cliente
+        for(int j = 0; j < cantidadCompras; j++) {
+            if (compras[j].cliente.cedula == cedulaActual) {
+                contador++;
+            }
+        }
+
+        // Si es el que más compras ha hecho hasta ahora
+        if (contador > maxCompras) {
+            maxCompras = contador;
+			cliente = compras[i].cliente;
+			
+        }
+    }
+	LIMPIARPANTALLLA()
+
+	printf("Realizo %d compras. El cliente es: \n", maxCompras);
+
+	return cliente;
+}
+
+// ===== END CLIENTE CON MAS COMPRAS ===== //
+
+// ===== CLIENTE CON MAS PRESTAMOS ===== //
+Cliente mostrarClienteConMasPrestamos(Prestamo prestamos[]) {
+    int maxPrestamos = 0;
+	Cliente cliente;
+
+    for (int i = 0; i < cantidadPrestamos; i++) {
+        int cedulaActual = prestamos[i].cliente.cedula;
+        int contador = 0;
+
+        // Contar cuántas veces aparece este cliente
+        for (int j = 0; j < cantidadCompras; j++) {
+            if (prestamos[j].cliente.cedula == cedulaActual) {
+                contador++;
+            }
+        }
+
+        // Si es el que más compras ha hecho hasta ahora
+        if (contador > maxPrestamos) {
+            maxPrestamos = contador;
+			cliente = prestamos[i].cliente;
+			
+        }
+    }
+	LIMPIARPANTALLLA()
+
+	printf("Realizo %d prestamos. El cliente es: \n", maxPrestamos);
+
+	return cliente;
+}
 
 
 // ===== CRUDS PARA TODAS LAS ESTRUCTURAS ===== //
@@ -308,6 +434,7 @@ Cliente modificarCliente(Cliente cliente){
 	// Con el switch se selecciona el dato que se quiere modificar, no permite modificar la cédula.
 	int opc;
 	while(opc != 5){
+		LIMPIARPANTALLLA()
 		DECORACION
 		printf("Que dato desea modificar? \n");
 		printf("1. Nombre \n");
@@ -318,7 +445,7 @@ Cliente modificarCliente(Cliente cliente){
 		DECORACION
 		scanf("%d", &opc);
 		getchar();
-		switch (opc)
+		switch(opc)
 		{
 			case 1:
 				printf("Ingrese el nombre: ");
@@ -349,7 +476,7 @@ Cliente modificarCliente(Cliente cliente){
 }
 
 // eliminar un cliente
-int eliminarCliente(Cliente clientes[], int cantidadClientes, int cedula){
+int eliminarCliente(Cliente clientes[], int cedula){
 	// Se buscará en la lista de clientes la cédula ingresada.
 	int found = 0, i, j;
 	for(i = 0; i < cantidadClientes; i++){
@@ -399,6 +526,7 @@ void mostrarFecha(Fecha fecha){
 Fecha modificarFecha(Fecha fecha){
     // Con el switch se selecciona el dato a modificar.
     int opc;
+	LIMPIARPANTALLLA()
     DECORACION
 	printf("Que dato desea modificar? \n");
 	printf("1.Dia \n");
@@ -406,7 +534,7 @@ Fecha modificarFecha(Fecha fecha){
 	printf("3.Anio \n");
 	DECORACION
 	scanf("%d", &opc);
-	switch (opc)
+	switch(opc)
 	{
 		case 1:
 			printf("ingrese su dia: ");
@@ -492,6 +620,7 @@ Libro modificarLibro(Libro libro){
 	int opcion;
 	opcion = 1;
 	while(opcion !=6){
+		LIMPIARPANTALLLA()
 		menu();
 	
 		scanf("%d", &opcion);
@@ -528,7 +657,7 @@ Libro modificarLibro(Libro libro){
 	return libro;
 }
 // funcion para eliminar libro
-int eliminarLibro(Libro libros[], int cantidadLibros, int codigo){
+int eliminarLibro(Libro libros[], int codigo){
 	// Se verifica si el codigo coincide con un libro existente.
 	int found = 0, i, j;
 	for( i = 0; i < cantidadLibros; i++){
@@ -556,17 +685,17 @@ int eliminarLibro(Libro libros[], int cantidadLibros, int codigo){
 
 
 // ===== CRUD COMPRA ===== //
-Compra crearCompra(Libro libros[], int cantidadLibros, Cliente clientes[], int cantidadClientes){
+Compra crearCompra(Libro libros[], Cliente clientes[]){
 	// Recibe los libros y clientes
 	Compra compra;
-	int codigo, cedula, i;
+	int cedula, i;
 	printf("ingrese el numero de compra: ");
 	scanf("%d", &compra.numeroCompra);
 	printf("Ingrese el numero de cedula del cliente: ");
 	scanf("%d", &cedula);
 	// Verifica si el cliente existe para asignar el cliente a la compra o crear el cliente y asignarlo.
-	if(verificarCliente(cedula, clientes, cantidadClientes)){
-		compra.cliente = asignarCliente(cedula, clientes, cantidadClientes);
+	if(verificarCliente(cedula, clientes)){
+		compra.cliente = asignarCliente(cedula, clientes);
 	} else {
 		compra.cliente = crearCliente(cedula);
 		clientes[cantidadClientes] = compra.cliente;
@@ -578,9 +707,8 @@ Compra crearCompra(Libro libros[], int cantidadLibros, Cliente clientes[], int c
 	scanf("%d", &compra.cantidadLibros);
 	// Ingresa la cantidad de libros en la compra, y por cada uno asigna un libro según su codigo.
 	for(i = 0; i < compra.cantidadLibros; i++){
-		printf("Ingrese el codigo del libro %d: ", i+1);
-		scanf("%d", &codigo);
-		compra.libros[i] = libroSeleccionado(codigo, libros, cantidadLibros);
+		compra.libros[i] = libroSeleccionado(libros);
+		calcularCantidadLibro(libros, compra.libros[i].codigo, -1);
 	}
 	compra.fecha = crearFecha();
     printf("ingrese su metodo de pago: \n");
@@ -605,10 +733,10 @@ void mostrarCompra(Compra compra){
     printf("%d \n", compra.numeroCompra);
     mostrarCliente(compra.cliente);
 	for(i = 0; i<compra.cantidadLibros; i++){
-		printf("%s", compra.libros[i].titulo);
+		printf("%d.%s", i+1, compra.libros[i].titulo);
 		printf("%.2f\n", compra.libros[i].precio);
 	}
-	switch (compra.metodoDePago) {
+	switch(compra.metodoDePago) {
 		case Efectivo:
 			printf("Metodo de pago: Efectivo\n");
 			break;
@@ -623,9 +751,11 @@ void mostrarCompra(Compra compra){
 	DECORACION2
 }
 
-Compra modificarCompra(Compra compra, Cliente clientes[], int cantidadClientes, Libro libros[], int cantidadLibros){
+Compra modificarCompra(Compra compra, Cliente clientes[], Libro libros[]){
     // Con el switch se selecciona un único dato para modificar.
-    int opc, cedula, numeroLibro, codigoLibro, i;
+    int opc, cedula, numeroLibro, i;
+	LIMPIARPANTALLLA()
+	DECORACION
 	printf("Que dato desea modificar?\n");
 	printf("1.Cliente \n");
 	printf("2.Libro \n");
@@ -633,14 +763,14 @@ Compra modificarCompra(Compra compra, Cliente clientes[], int cantidadClientes, 
     printf("4.Metodo de pago \n");
     DECORACION
 	scanf("%d", &opc);
-	switch (opc)
+	switch(opc)
 	{
 		case 1:
 			printf("Ingrese el numero de cedula del cliente: ");
 			scanf("%d", &cedula);
 			// Se verifica el cliente para asignar el existente o uno nuevo
-			if(verificarCliente(cedula, clientes, cantidadClientes)){
-				compra.cliente = asignarCliente(cedula, clientes, cantidadClientes);
+			if(verificarCliente(cedula, clientes)){
+				compra.cliente = asignarCliente(cedula, clientes);
 			} else {
 				compra.cliente = crearCliente(cedula);
 				clientes[cantidadClientes] = compra.cliente;
@@ -656,9 +786,9 @@ Compra modificarCompra(Compra compra, Cliente clientes[], int cantidadClientes, 
 			}
 			printf("Ingrese el numero del libro que desea modificar: ");
 			scanf("%d", &numeroLibro);
-			printf("Ingrese el codigo del libro nuevo: ");
-			scanf("%d", &codigoLibro);
-			compra.libros[numeroLibro-1] = libroSeleccionado(codigoLibro, libros, cantidadLibros);
+			calcularCantidadLibro(libros, compra.libros[numeroLibro-1].codigo, 1);
+			compra.libros[numeroLibro-1] = libroSeleccionado(libros);
+			calcularCantidadLibro(libros, compra.libros[numeroLibro-1].codigo, -1);
 			// Se calcula nuevamente el total a pagar ya que cambió el libro, por tanto su precio.
 			compra.totalAPagar = calcularTotal(compra.libros, compra.cantidadLibros);
 			break;	
@@ -685,7 +815,7 @@ Compra modificarCompra(Compra compra, Cliente clientes[], int cantidadClientes, 
 	return compra;
 }
 
-int eliminarCompra(Compra compras[], int cantidadCompras, int numeroCompra){
+int eliminarCompra(Compra compras[], int numeroCompra){
 	// Buscar la compra por su numero de compra para verificar si existe.
     int found = 0, i, j;
 
@@ -713,19 +843,18 @@ int eliminarCompra(Compra compras[], int cantidadCompras, int numeroCompra){
 // ===== END CRUD COMPRA ===== //
 
 // ===== CRUD PRESTAMO ===== //
-Prestamo crearPrestamo(Libro libros[], int cantidadLibros, Cliente clientes[], int cantidadClientes){
+Prestamo crearPrestamo(Libro libros[], Cliente clientes[]){
 	// Se reciben los libros y clientes para asignarlos al nuevo prestamo
 	Prestamo prestamo;
-	int cedula, codigo;
-	int i;
+	int cedula, i;
 
 	printf("ingrese el numero del prestamo: ");
 	scanf("%d", &prestamo.numeroPrestamo);
 	printf("Ingrese el numero de cedula del cliente: ");
 	scanf("%d", &cedula);
 	// Se verifica si el cliente existe para asignar el cliente existente o crear uno nuevo para el prestamo.
-	if(verificarCliente(cedula, clientes, cantidadClientes)){
-		prestamo.cliente = asignarCliente(cedula, clientes, cantidadClientes);
+	if(verificarCliente(cedula, clientes)){
+		prestamo.cliente = asignarCliente(cedula, clientes);
 	} else {
 		prestamo.cliente = crearCliente(cedula);
 		clientes[cantidadClientes] = prestamo.cliente;
@@ -737,9 +866,8 @@ Prestamo crearPrestamo(Libro libros[], int cantidadLibros, Cliente clientes[], i
 	printf("ingrese la cantidad de libros: ");
 	scanf("%d", &prestamo.cantidadLibros);
 	for(i = 0; i < prestamo.cantidadLibros; i++){
-		printf("Ingrese el codigo del libro %d: ", i+1);
-		scanf("%d", &codigo);
-		prestamo.libros[i] = libroSeleccionado(codigo, libros, cantidadLibros);
+		prestamo.libros[i] = libroSeleccionado(libros);
+		calcularCantidadLibro(libros, prestamo.libros[i].codigo, -1);
 	}
 	printf("ingrese la fecha de creacion\n");
 	prestamo.fechaPrestamo = crearFecha();
@@ -748,14 +876,7 @@ Prestamo crearPrestamo(Libro libros[], int cantidadLibros, Cliente clientes[], i
 	// Se asigna una fecha vacía o nula ya que aún no se ha devuelto.
 	prestamo.fechaDevolucion = eliminarFecha(prestamo.fechaDevolucion);
 	// Se ingresa el estado del prestamo según el enumerador.
-    printf("1. prestado\n");
-	printf("2. devuelto\n"); 
-    printf("Ingrese el numero del estado del prestamo: ");
-	scanf("%d", &prestamo.estado);
-    if(prestamo.estado != Prestado && prestamo.estado != Devuelto) {
-		printf("Opcion invalida. Se asignara Prestado por defecto.\n");
-		prestamo.estado = Prestado;
-	}
+	prestamo.estado = Prestado;
 	return prestamo;
 }
 
@@ -773,7 +894,7 @@ void mostrarPrestamo(Prestamo prestamo){
 	mostrarFecha(prestamo.fechaLimite);
 	printf("Fecha de devolucion: ");
 	mostrarFecha(prestamo.fechaDevolucion);
-	switch (prestamo.estado)
+	switch(prestamo.estado)
 	{
 		case Prestado:
 			printf("Estado del prestamo: Prestado \n");
@@ -785,9 +906,10 @@ void mostrarPrestamo(Prestamo prestamo){
 	}
 }
 
-Prestamo modificarPrestamo(Prestamo prestamo, Cliente clientes[], int cantidadClientes, Libro libros[], int cantidadLibros){
+Prestamo modificarPrestamo(Prestamo prestamo, Cliente clientes[], Libro libros[]){
     // El switch selecciona el dato a modificar del prestamo.
-    int codigoLibro, numeroLibro, i, opc, cedula;
+    int numeroLibro, i, opc, cedula;
+	LIMPIARPANTALLLA()
     DECORACION
 	printf("que dato desea modificar? \n");
 	printf("1.Cliente \n");
@@ -798,14 +920,14 @@ Prestamo modificarPrestamo(Prestamo prestamo, Cliente clientes[], int cantidadCl
     printf("6.Estado \n");
     DECORACION
 	scanf("%d", &opc);
-	switch (opc)
+	switch(opc)
 	{
 		case 1:
 			// Se ingresa la cedula para asignar un cliente existente o uno nuevo
 			printf("Ingrese el numero de cedula del cliente: ");
 			scanf("%d", &cedula);
-			if(verificarCliente(cedula, clientes, cantidadClientes)){
-				prestamo.cliente = asignarCliente(cedula, clientes, cantidadClientes);
+			if(verificarCliente(cedula, clientes)){
+				prestamo.cliente = asignarCliente(cedula, clientes);
 			} else {
 				prestamo.cliente = crearCliente(cedula);
 				clientes[cantidadClientes] = prestamo.cliente;
@@ -821,9 +943,9 @@ Prestamo modificarPrestamo(Prestamo prestamo, Cliente clientes[], int cantidadCl
 			}
 			printf("Ingrese el numero del libro que desea modificar: \n");
 			scanf("%d", &numeroLibro);
-			printf("Ingrese el codigo del libro nuevo: ");
-			scanf("%d", &codigoLibro);
-			prestamo.libros[numeroLibro-1] = libroSeleccionado(codigoLibro, libros, cantidadLibros);
+			calcularCantidadLibro(libros, prestamo.libros[numeroLibro-1].codigo, 1);
+			prestamo.libros[numeroLibro-1] = libroSeleccionado(libros);
+			calcularCantidadLibro(libros, prestamo.libros[numeroLibro-1].codigo, -1);
 			break;
 		case 3:
 			prestamo.fechaPrestamo=modificarFecha(prestamo.fechaPrestamo);
@@ -838,11 +960,9 @@ Prestamo modificarPrestamo(Prestamo prestamo, Cliente clientes[], int cantidadCl
 			// Con el enumerador se selecciona el nuevo estado del prestamo.
 			printf("1. prestado\n");
 			printf("2. devuelto\n"); 
-			printf("Ingrese el estado del prestamo: ");
-			scanf("%d", &prestamo.estado);
-			if(prestamo.estado != Prestado && prestamo.estado != Devuelto) {
-				printf("Opcion invalida. Se asignara Prestado por defecto.\n");
-				prestamo.estado = Prestado;
+			prestamo = asignarEstado(libros, prestamo);
+			if(prestamo.estado == Devuelto){
+				prestamo.fechaDevolucion = crearFecha();
 			}
 			break;
 		default:
@@ -853,7 +973,7 @@ Prestamo modificarPrestamo(Prestamo prestamo, Cliente clientes[], int cantidadCl
 	return prestamo;
 }
 
-int eliminarPrestamo(Prestamo prestamos[], int cantidadPrestamos, int numeroPrestamo){
+int eliminarPrestamo(Prestamo prestamos[], int numeroPrestamo){
 	// Se valida si numeroPrestamo coincide con los registrados para eliminarlo.
     int found = 0, i, j;
 
@@ -884,10 +1004,12 @@ int eliminarPrestamo(Prestamo prestamos[], int cantidadPrestamos, int numeroPres
 
 
 // ===== MENU MANEJO CLIENTES ===== //
-void menuManejoClientes(Cliente clientes[], int cantidadClientes){
+void menuManejoClientes(Cliente clientes[]){
 	int opcion, cedula, i, pos;
     while(opcion != 5) {
 		// En este menu se listan las opciones para el manejo de Clientes (CRUD de Clientes).
+		LIMPIARPANTALLLA()
+		DECORACION
         printf("\n--- MENU CLIENTES ---\n");
         printf("1. Crear cliente\n");
         printf("2. Mostrar clientes\n");
@@ -898,13 +1020,13 @@ void menuManejoClientes(Cliente clientes[], int cantidadClientes){
         printf("Elija una opcion: ");
         scanf("%d", &opcion);
 
-        switch (opcion) {
+        switch(opcion) {
             case 1:
-                if (cantidadClientes < 100){
+                if (cantidadClientes < TAMANIOMAXIMO){
 					printf("Ingrese la cedula: ");
 					scanf("%d", &cedula);
 					// Se verifica si ese numero de cedula existe, si no existe se creará uno nuevo con la función del CRUD
-					if(!verificarCliente(cedula, clientes, cantidadClientes)){
+					if(!verificarCliente(cedula, clientes)){
 						clientes[cantidadClientes] = crearCliente(cedula);
                     	cantidadClientes++;
 						guardarArchivoClientes(clientes, cantidadClientes);
@@ -916,17 +1038,19 @@ void menuManejoClientes(Cliente clientes[], int cantidadClientes){
                 }
                 break;
             case 2:
+				LIMPIARPANTALLLA()
 				// Se lee nuevamente el archivo de clientes para tener la vista actualizada.
-				cantidadClientes = leerArchivoCliente(clientes);
                 for (i = 0; i < cantidadClientes; i++) {
                     printf("\nCliente #%d:\n", i+1);
                     mostrarCliente(clientes[i]);
 					DECORACION
                 }
+				printf("\n Presione Enter para salir...");
+				getchar();				
+				getchar();
                 break;
             case 3:
 				// Se elige el cliente para modificar pasando a la función modificar el cliente especifico.
-				cantidadClientes = leerArchivoCliente(clientes);
                 printf("Ingrese el numero del cliente a modificar (1 a %d): ", cantidadClientes);
                 scanf("%d", &pos);
                 if (pos >= 1 && pos <= cantidadClientes) {
@@ -942,8 +1066,11 @@ void menuManejoClientes(Cliente clientes[], int cantidadClientes){
 				// Se ingresa un número de cédula para ir a compararla con las cedulas registradas y luego guardar el archivo
 				printf("Ingrese la cedula a eliminar: ");
 				scanf("%d", &cedula);
-				cantidadClientes = eliminarCliente(clientes, cantidadClientes, cedula);
+				cantidadClientes = eliminarCliente(clientes, cedula);
 				guardarArchivoClientes(clientes, cantidadClientes);
+				printf("Presione Enter para salir...");
+				getchar();
+				getchar();
 				break;
             case 5:
 				// caso para salir del menú, además guarda de nuevo el archivo 
@@ -959,11 +1086,13 @@ void menuManejoClientes(Cliente clientes[], int cantidadClientes){
 // ===== END MENU MANEJO CLIENTES ===== //
 
 // ===== MENU MANEJO LIBROS ===== //
-void menuManejoLibro(Libro libros[], int cantidadLibros){
+void menuManejoLibro(Libro libros[]){
 	int opcion, ultimoCodigo, codigo, pos, i;
 
     while(opcion != 5) {
 		// Menu para manejo de libros
+		LIMPIARPANTALLLA()
+		DECORACION
         printf("\n--- MENU LIBROS ---\n");
         printf("1. Crear libros\n");
         printf("2. Mostrar libros\n");
@@ -974,11 +1103,11 @@ void menuManejoLibro(Libro libros[], int cantidadLibros){
         printf("Elija una opcion: ");
         scanf("%d", &opcion);
 
-        switch (opcion) {
+        switch(opcion) {
             case 1:
-                if (cantidadLibros < 100) {
+                if (cantidadLibros < TAMANIOMAXIMO) {
 					// Se busca el codigo del último libro registrado, para asignar al nuevo libro el siguiente consecutivo
-					ultimoCodigo = buscarUltimoCodigo(libros, cantidadLibros);
+					ultimoCodigo = buscarUltimoCodigo(libros);
 					libros[cantidadLibros] = crearLibro(ultimoCodigo+1);
                     cantidadLibros++;
 					guardarArchivoLibros(libros, cantidadLibros);
@@ -988,11 +1117,14 @@ void menuManejoLibro(Libro libros[], int cantidadLibros){
                 break;
             case 2:
 				// Mostrar uno por uno todos los libros registrados.
-				cantidadLibros = leerArchivoLibros(libros);
+				LIMPIARPANTALLLA()
                 for (i = 0; i < cantidadLibros; i++) {
                     printf("\nLibro #%d:\n", i+1);
                     mostrarLibro(libros[i]);
                 }
+				printf("Presione Enter para salir...");
+				getchar();
+				getchar();
                 break;
             case 3:
 				// Elegir un libro para modificarlo en la función.
@@ -1009,7 +1141,10 @@ void menuManejoLibro(Libro libros[], int cantidadLibros){
 				// se ingresa el codigo del libro para eliminar uno específico.
             	printf("Ingrese el codigo a eliminar: ");
 				scanf("%d", &codigo);
-				cantidadLibros = eliminarLibro(libros, cantidadLibros, codigo);
+				cantidadLibros = eliminarLibro(libros, codigo);
+				printf("Presione Enter para salir...");
+				getchar();
+				getchar();
 				guardarArchivoLibros(libros, cantidadLibros);
 				break;
             case 5:
@@ -1027,10 +1162,12 @@ void menuManejoLibro(Libro libros[], int cantidadLibros){
 // ===== END MENU MANEJO LIBROS ===== //
 
 // ===== MENU MANEJO DE COMPRAS ===== //
-void menuManejoCompra(Compra compras[], int cantidadCompras, Libro libros[], int cantidadLibros, Cliente clientes[], int cantidadClientes){
+void menuManejoCompra(Compra compras[], Libro libros[], Cliente clientes[]){
 	int opcion, numeroCompra, i, pos;
     while(opcion != 5) {
 		// Menu para manejar las acciones en las compras
+		LIMPIARPANTALLLA()
+		DECORACION
         printf("\n--- MENU COMPRAS ---\n");
         printf("1. Crear compra\n");
         printf("2. Mostrar compras\n");
@@ -1041,13 +1178,12 @@ void menuManejoCompra(Compra compras[], int cantidadCompras, Libro libros[], int
         printf("Elija una opcion: \n");
         scanf("%d", &opcion);
 
-        switch (opcion) {
+        switch(opcion) {
             case 1:
-                if (cantidadCompras < 100) {
+                if (cantidadCompras < TAMANIOMAXIMO) {
 					// Se lee el archivo de libros para tener la cantidad de libros actualizada, para luego crear la compra.
-					cantidadLibros = leerArchivoLibros(libros);
 					// Se pasan los libros y clientes a crear Compra ya que la compra tiene asociada estos datos. 
-                    compras[cantidadCompras] = crearCompra(libros, cantidadLibros, clientes, cantidadClientes);
+                    compras[cantidadCompras] = crearCompra(libros, clientes);
                     cantidadCompras++;
 					guardarArchivoCompra(compras, cantidadCompras);
                 } else {
@@ -1056,21 +1192,22 @@ void menuManejoCompra(Compra compras[], int cantidadCompras, Libro libros[], int
                 break;
             case 2:
 				// Mostrar una a una las compras registradas.
-				cantidadCompras = leerArchivoCompra(compras);
+				LIMPIARPANTALLLA()
                 for (i = 0; i < cantidadCompras; i++) {
                     printf("\ncompra #%d:\n", i+1);
                     mostrarCompra(compras[i]);
                 }
+				printf("Presione Enter para salir...");
+				getchar();
+				getchar();
                 break;
             case 3:
 				// Se leen los libros para tener actualizada la cantidad.
-				cantidadLibros = leerArchivoLibros(libros);
-				cantidadCompras = leerArchivoCompra(compras);
                 printf("Ingrese el numero de la compra a modificar (1 a %d): ", cantidadCompras);
                 scanf("%d", &pos);
                 if (pos >= 1 && pos <= cantidadCompras) {
 					// Eligiendo una compra específica se modificará esta pasando la compra, clientes y libros para asociarlos.
-                    compras[pos - 1] = modificarCompra(compras[pos - 1], clientes, cantidadClientes, libros, cantidadLibros);
+                    compras[pos - 1] = modificarCompra(compras[pos - 1], clientes, libros);
                 } else {
                     printf("Indice invalido.\n");
                     SONIDOERROR
@@ -1079,10 +1216,12 @@ void menuManejoCompra(Compra compras[], int cantidadCompras, Libro libros[], int
                 break;
 			case 4:
 				// Eliminar una compra por su numero de compra.
-				cantidadCompras = leerArchivoCompra(compras);
 				printf("Ingrese el numero de compra a eliminar: ");
 				scanf("%d", &numeroCompra);
-				cantidadCompras = eliminarCompra(compras, cantidadCompras, numeroCompra);
+				cantidadCompras = eliminarCompra(compras, numeroCompra);
+				printf("Presione Enter para salir...");
+				getchar();
+				getchar();
 				guardarArchivoCompra(compras, cantidadCompras);
             case 5:
 				// Caso para salir del menú y guardar el archivo.
@@ -1099,11 +1238,13 @@ void menuManejoCompra(Compra compras[], int cantidadCompras, Libro libros[], int
 // ===== END MENU MANEJO DE COMPRAS ===== //
 
 // ===== MENU MANEJO DE PRESTAMOS ===== //
-void menuManejoPrestamo(Prestamo prestamos[], int cantidadPrestamo, Libro libros[], int cantidadLibros, Cliente clientes[], int cantidadClientes){
+void menuManejoPrestamo(Prestamo prestamos[], Libro libros[], Cliente clientes[]){
 	int opcion, numeroPrestamo;
 	int i;
     while(opcion != 5) {
 		// Menu para el manejo de prestamos.
+		LIMPIARPANTALLLA()
+		DECORACION
         printf("\n--- MENU PRESTAMOS ---\n");
         printf("1. Crear prestamo\n");
         printf("2. Mostrar prestamo\n");
@@ -1114,54 +1255,55 @@ void menuManejoPrestamo(Prestamo prestamos[], int cantidadPrestamo, Libro libros
         printf("Elija una opcion: ");
         scanf("%d", &opcion);
 
-        switch (opcion) {
+        switch(opcion) {
             case 1:
-                if (cantidadPrestamo < 100) {
-					// Se lee el archivo de libros para tener la cantidad actualizada
-					cantidadLibros = leerArchivoLibros(libros);
+                if (cantidadPrestamos< TAMANIOMAXIMO) {
 					// Se pasa a la función crear los libros y clientes para asociarlos.
-                    prestamos[cantidadPrestamo] = crearPrestamo(libros, cantidadLibros, clientes, cantidadClientes);
-                    cantidadPrestamo++;
-					guardarArchivoPrestamo(prestamos, cantidadPrestamo);
+                    prestamos[cantidadPrestamos] = crearPrestamo(libros, clientes);
+                    cantidadPrestamos++;
+					guardarArchivoPrestamo(prestamos, cantidadPrestamos);
                 } else {
                     printf("No hay mas espacio para prestamos.\n");
                 }
                 break;
             case 2:
 				// Mostrar uno a uno los prestamos registrados.
-				cantidadPrestamo = leerArchivoPrestamo(prestamos);
-                for (i = 0; i < cantidadPrestamo; i++) {
+				LIMPIARPANTALLLA()
+                for (i = 0; i < cantidadPrestamos; i++) {
     				DECORACION2
                     printf("Prestamo #%d:\n", i+1);
                     mostrarPrestamo(prestamos[i]);
                 }
+				printf("Presione Enter para salir...");
+				getchar();
+				getchar();
                 break;
             case 3:
 				// Leer los libros para tener la cantidad actualizada.
-				cantidadLibros = leerArchivoLibros(libros);
-				cantidadPrestamo = leerArchivoPrestamo(prestamos);
-                printf("Ingrese el numero del prestamo a modificar (1 a %d): ", cantidadPrestamo);
+                printf("Ingrese el numero del prestamo a modificar (1 a %d): ", cantidadPrestamos);
                 int pos;
                 scanf("%d", &pos);
-                if (pos >= 1 && pos <= cantidadPrestamo) {
+                if (pos >= 1 && pos <= cantidadPrestamos) {
 					// Llamar a modificar el prestamo específico seleccionado.
-                    prestamos[pos - 1] = modificarPrestamo(prestamos[pos - 1], clientes, cantidadClientes, libros, cantidadLibros);
+                    prestamos[pos - 1] = modificarPrestamo(prestamos[pos - 1], clientes, libros);
                 } else {
                     printf("Indice invalido.\n");
                     SONIDOERROR
                 }
-				guardarArchivoPrestamo(prestamos, cantidadPrestamo);
+				guardarArchivoPrestamo(prestamos, cantidadPrestamos);
                 break;
 			case 4:
 				// Eliminar un prestamo específico a partir del numeroPrestamo.
-				cantidadPrestamo = leerArchivoPrestamo(prestamos);
 				printf("Ingrese el numero de prestamo a eliminar: ");
 				scanf("%d", &numeroPrestamo);
-				cantidadPrestamo = eliminarPrestamo(prestamos, cantidadPrestamo, numeroPrestamo);
-				guardarArchivoPrestamo(prestamos, cantidadPrestamo);
+				cantidadPrestamos = eliminarPrestamo(prestamos, numeroPrestamo);
+				printf("Presione Enter para salir...");
+				getchar();
+				getchar();
+				guardarArchivoPrestamo(prestamos, cantidadPrestamos);
             case 5:
 				// Caso para salir del menú y guardar el archivo.
-                guardarArchivoPrestamo(prestamos, cantidadPrestamo);
+                guardarArchivoPrestamo(prestamos, cantidadPrestamos);
                 printf("Prestamos guardados\n");
                 break;
             default:
@@ -1173,12 +1315,13 @@ void menuManejoPrestamo(Prestamo prestamos[], int cantidadPrestamo, Libro libros
 // ===== END MENU MANEJO DE PPRESTAMOS ===== //
 
 // ===== MENU MANEJO DE MOVIMIENTO ===== //
-void menuMovimientos(Compra compras[], int cantidadCompras, Prestamo prestamos[], int cantidadPrestamos, Libro libros[], int cantidadLibros, Cliente clientes[], int cantidadClientes){
+void menuMovimientos(Compra compras[], Prestamo prestamos[], Libro libros[], Cliente clientes[]){
 	TipoTransaccion opcMovimiento = 0;
 
 	while(opcMovimiento != 3)
 	{	
 		// Menu para el manejo de movimientos = Compras y Prestamos.
+		LIMPIARPANTALLLA()
 		DECORACION
 		printf("1. Administrar Compras \n");
 		printf("2. Administrar Prestamos \n");
@@ -1188,13 +1331,13 @@ void menuMovimientos(Compra compras[], int cantidadCompras, Prestamo prestamos[]
 
 		DECORACION
 		// Para este switch case se utiliza el enumerador TipoTransaccion para compras, prestamos o salir del menú.
-		switch (opcMovimiento)
+		switch(opcMovimiento)
 		{
 			case Compras:
-				menuManejoCompra(compras, cantidadCompras, libros, cantidadLibros, clientes, cantidadClientes);
+				menuManejoCompra(compras, libros, clientes);
 				break;
 			case Prestamos:
-				menuManejoPrestamo(prestamos, cantidadPrestamos, libros, cantidadLibros, clientes, cantidadClientes);
+				menuManejoPrestamo(prestamos, libros, clientes);
 				break;	
 			case Salir: 
 				printf("Saliendo del menu.");
@@ -1208,47 +1351,101 @@ void menuMovimientos(Compra compras[], int cantidadCompras, Prestamo prestamos[]
 }
 // ===== END MENU MANEJO DE MOVIMIENTO ===== //
 
+// ===== MENU ESTADISTICAS ===== //
+void menuEstadisticas(Compra compras[], Prestamo prestamos[], int cantidadCompras){
+	Cliente cliente;
+	int opcEst = 0;
+	int totalVendido;
+
+	while (opcEst != 4)
+	{
+		LIMPIARPANTALLLA()
+		DECORACION
+		printf("=== MENU ESTADISTICAS === \n");
+		printf("1. Mostrar Total Vendido.\n");
+		printf("2. Mostrar Cliente con mas Compras.\n");
+		printf("3. Mostrar Cliente con mas Prestamos.\n");
+		printf("4. Salir del menu. \n");
+		DECORACION
+		printf("Elija una opcion: ");
+		scanf("%d", &opcEst);
+
+		switch (opcEst)
+		{
+			case 1:
+				totalVendido = calcularTotalVendido(compras, cantidadCompras);
+				printf("El valor total de las ventas fue de: %d \n", totalVendido);
+				printf("Presione Enter para salir...");
+				getchar();
+				getchar();
+				break;
+			case 2:
+				cliente = mostrarClienteConMasCompras(compras);
+				mostrarCliente(cliente);
+				printf("Presione Enter para salir...");
+				getchar();
+				getchar();
+				break;
+			case 3:
+				cliente = mostrarClienteConMasPrestamos(prestamos);
+				mostrarCliente(cliente);
+				printf("Presione Enter para salir...");
+				getchar();
+				getchar();
+				break;
+			case 4: 
+				printf("Saliendo del menu... \n");
+				break;
+			default:
+				SONIDOERROR
+				ERROR
+				break;
+		}
+	}
+}
+
 
 // ===== MAIN FUNCIÓN PRINCIPAL ===== //
 int main() {
-	int opcMain, totalVendido;
+	int opcMain;
 	// Se crean las listas de estructuras
-    Cliente clientes[100];
-	Libro libros[100];
-	Compra compras[100];
-	Prestamo prestamos[100];
+    Cliente clientes[TAMANIOMAXIMO];
+	Libro libros[TAMANIOMAXIMO];
+	Compra compras[TAMANIOMAXIMO];
+	Prestamo prestamos[TAMANIOMAXIMO];
 	// Se determina la cantidad en cada una de las listas leyendo sus archivos.
-    int cantidadClientes = leerArchivoCliente(clientes);
-	int cantidadLibros = leerArchivoLibros(libros);
-	int cantidadCompras = leerArchivoCompra(compras);
-	int cantidadPrestamos=leerArchivoPrestamo(prestamos);
+    cantidadClientes = leerArchivoCliente(clientes);
+	cantidadLibros = leerArchivoLibros(libros);
+	cantidadCompras = leerArchivoCompra(compras);
+	cantidadPrestamos = leerArchivoPrestamo(prestamos);
 
 	while(opcMain != 5)
 	{
 		// Menu principal, aquí empieza la lógica para elegir que tipos de movimientos se realizan.
+		LIMPIARPANTALLLA()
+		DECORACION
 		printf("\n========== MENU PRINCIPAL ==========\n");
 		printf("1. Administrar Clientes.\n");
 		printf("2. Administrar Libros.\n");
 		printf("3. Adminitrar Movimiento.\n");
-		printf("4. Mostrar Total Vendido.\n");
+		printf("4. Estadisticas.\n");
 		printf("5. Cerrar Programa.\n");
 		DECORACION
-		printf("Elija una opcion: \n");
+		printf("Elija una opcion: ");
 		scanf("%d", &opcMain);
 		switch(opcMain)
 		{
 			case 1:
-				menuManejoClientes(clientes, cantidadClientes);
+				menuManejoClientes(clientes);
 				break;
 			case 2:
-				menuManejoLibro(libros, cantidadLibros);
+				menuManejoLibro(libros);
 				break;
 			case 3:
-				menuMovimientos(compras, cantidadCompras, prestamos, cantidadPrestamos, libros, cantidadLibros, clientes, cantidadClientes);
+				menuMovimientos(compras, prestamos, libros, clientes);
 				break;
 			case 4:
-				totalVendido = calcularTotalVendido(compras, cantidadCompras);
-				printf("El valor total de las ventas fue de: %d", totalVendido);
+				menuEstadisticas(compras, prestamos, cantidadCompras);
 				break;
 			case 5:
 				DECORACION
