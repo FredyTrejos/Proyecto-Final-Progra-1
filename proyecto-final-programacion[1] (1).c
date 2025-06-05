@@ -474,7 +474,6 @@ Cliente modificarCliente(Cliente cliente){
 			default:
 				ERROR
 				SONIDOERROR
-				ENTERS
 				break;
 		}
 	}
@@ -557,7 +556,6 @@ Fecha modificarFecha(Fecha fecha){
 		default:
 			ERROR
 			SONIDOERROR
-			ENTERS
 			break;
 	}
 	return fecha;
@@ -659,7 +657,6 @@ Libro modificarLibro(Libro libro){
             default:
     			ERROR
 				SONIDOERROR
-				ENTERS
                 break;
 		}
 	}
@@ -826,7 +823,6 @@ Compra modificarCompra(Compra compra, Cliente clientes[], Libro libros[]){
 			default:
 				ERROR
 				SONIDOERROR
-				ENTERS
 				break;
 		}
 	}
@@ -992,7 +988,6 @@ Prestamo modificarPrestamo(Prestamo prestamo, Cliente clientes[], Libro libros[]
 			default:
 				ERROR
 				SONIDOERROR
-				ENTERS
 				break;
 		}
 	}
@@ -1102,7 +1097,6 @@ void menuManejoClientes(Cliente clientes[]){
             default:
             	ERROR
 				SONIDOERROR
-				ENTERS
         }
     }
 }
@@ -1174,7 +1168,6 @@ void menuManejoLibro(Libro libros[]){
             default:
           		ERROR
 				SONIDOERROR
-				ENTERS
 				break;
         }
     }
@@ -1247,7 +1240,6 @@ void menuManejoCompra(Compra compras[], Libro libros[], Cliente clientes[]){
             default:
                 ERROR
 				SONIDOERROR
-				ENTERS
 				break;
         }
     }
@@ -1323,7 +1315,6 @@ void menuManejoPrestamo(Prestamo prestamos[], Libro libros[], Cliente clientes[]
             default:
                	ERROR
 				SONIDOERROR
-				ENTERS
 				break;
         }
     }
@@ -1361,7 +1352,6 @@ void menuMovimientos(Compra compras[], Prestamo prestamos[], Libro libros[], Cli
 			default:
 				ERROR
 				SONIDOERROR
-				ENTERS
 				break;
 		}	
 	}
@@ -1411,7 +1401,6 @@ void menuEstadisticas(Compra compras[], Prestamo prestamos[], int cantidadCompra
 			default:
 				SONIDOERROR
 				ERROR
-				ENTERS
 				break;
 		}
 	}
@@ -1440,7 +1429,7 @@ int main() {
 		printf("\n========== MENU PRINCIPAL ==========\n");
 		printf("1. Administrar Clientes.\n");
 		printf("2. Administrar Libros.\n");
-		printf("3. Administrar Movimiento.\n");
+		printf("3. Adminitrar Movimiento.\n");
 		printf("4. Estadisticas.\n");
 		printf("5. Cerrar Programa.\n");
 		DECORACION
@@ -1468,7 +1457,6 @@ int main() {
 			default:
 				ERROR
 				SONIDOERROR
-				ENTERS
 				break;
 		}
 	}
